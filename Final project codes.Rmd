@@ -1,0 +1,73 @@
+---
+title: "Untitled"
+author: "Kolor Nguyen"
+date: "3/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(shiny)
+library(shinythemes)
+
+```
+
+```{r}
+time1 <- time %>% separate(date, into = c("Year","Month","Day"),sep = "-",convert = TRUE) %>% mutate(Days_since_1st_case=Day + (Month-1)*31 - 19) %>% pivot_longer(col = c(Seoul,Daegu,Busan,Incheon,Gwangju,Daejeon,Ulsan,Sejong,Gyeonggi.do,Gangwon.do,Chungcheongbuk.do,Chungcheongnam.do,Jeollabuk.do,Jeollanam.do,Gyeongsangbuk.do,Gyeongsangnam.do,Jeju.do),names_to = "Region", values_to = "Confirmed_cases")
+time1
+Regions <- c("Seoul","Daegu","Busan","Incheon","Gwangju","Daejeon","Ulsan","Sejong","Gyeonggi.do","Gangwon.do","Chungcheongbuk.do","Chungcheongnam.do","Jeollabuk.do","Jeollanam.do","Gyeongsangbuk.do","Gyeongsangnam.do","Jeju.do")
+time2 <- time1 %>% filter(Region %in% Regions)
+```
+
+```{r}
+ui <- fluidPage(theme = shinytheme("slate"),
+  
+  headerPanel("Number of confirmed Coronavirus Disease 2019 (COVID-19) cases in South Korea"),
+  
+  sidebarLayout(
+
+    sidebarPanel(
+
+           
+           numericInput("starttime", 
+                        h4("Enter starting number of days since the 1st case:"), 
+                        value=35, 
+                        min=1, 
+                        max=55, 
+                        step=1),
+  
+           numericInput("endtime", 
+                        h4("Enter ending number of days since the 1st case:"), 
+                        value=55, 
+                        min=1, 
+                        max=55, 
+                        step=1),
+           checkboxGroupInput('region', h4('Regions to display:'), sort(Regions),
+                              selected=c("Seoul","Busan","Incheon","Gwangju","Daejeon","Ulsan","Sejong","Gangwon.do","Chungcheongbuk.do","Chungcheongnam.do","Jeollabuk.do","Jeollanam.do","Gyeongsangnam.do","Jeju.do"))
+    ),
+    
+    mainPanel(
+      plotOutput("plot")
+    )
+  ))
+
+server <- function(input, output) {
+  
+  output$plot <- renderPlot({
+    Start_time <- input$starttime
+    End_time <- input$endtime
+    Regions <- input$region
+    
+    region_df <-  time2 %>%
+      filter(Days_since_1st_case >= Start_time, Days_since_1st_case <= End_time, Region %in% Regions)
+    ggplot(data=region_df, aes(x=Days_since_1st_case, y=Confirmed_cases, color=Region)) + geom_line(size=1) + theme_bw() + xlab("Days since the 1st case in South Korea (January 20, 2020)") + ylab("Number of confirmed cases") + theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"),legend.title = element_text(size=12,face="bold"),legend.text = element_text(size=11)) + theme(aspect.ratio = 1) +  theme(plot.background=element_rect(fill="azure3"))
+  })
+}
+
+shinyApp(ui = ui, server = server)
