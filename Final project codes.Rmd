@@ -18,7 +18,9 @@ library(shinythemes)
 ```
 
 ```{r}
-time1 <- time %>% separate(date, into = c("Year","Month","Day"),sep = "-",convert = TRUE) %>% mutate(Days_since_1st_case=Day + (Month-1)*31 - 19) %>% pivot_longer(col = c(Seoul,Daegu,Busan,Incheon,Gwangju,Daejeon,Ulsan,Sejong,Gyeonggi.do,Gangwon.do,Chungcheongbuk.do,Chungcheongnam.do,Jeollabuk.do,Jeollanam.do,Gyeongsangbuk.do,Gyeongsangnam.do,Jeju.do),names_to = "Region", values_to = "Confirmed_cases")
+time1 <- time %>% separate(date, into = c("Year","Month","Day"),sep = "-",convert = TRUE) %>% 
+              mutate(Days_since_1st_case=Day + (Month-1)*31 - 19) %>% 
+              pivot_longer(col = c(Seoul,Daegu,Busan,Incheon,Gwangju,Daejeon,Ulsan,Sejong,Gyeonggi.do,Gangwon.do,Chungcheongbuk.do,Chungcheongnam.do,Jeollabuk.do,Jeollanam.do,Gyeongsangbuk.do,Gyeongsangnam.do,Jeju.do),names_to = "Region", values_to = "Confirmed_cases")
 time1
 Regions <- c("Seoul","Daegu","Busan","Incheon","Gwangju","Daejeon","Ulsan","Sejong","Gyeonggi.do","Gangwon.do","Chungcheongbuk.do","Chungcheongnam.do","Jeollabuk.do","Jeollanam.do","Gyeongsangbuk.do","Gyeongsangnam.do","Jeju.do")
 time2 <- time1 %>% filter(Region %in% Regions)
@@ -65,8 +67,13 @@ server <- function(input, output) {
     
     region_df <-  time2 %>%
       filter(Days_since_1st_case >= Start_time, Days_since_1st_case <= End_time, Region %in% Regions)
-    ggplot(data=region_df, aes(x=Days_since_1st_case, y=Confirmed_cases, color=Region)) + geom_line(size=1) + theme_bw() + xlab("Days since the 1st case in South Korea (January 20, 2020)") + ylab("Number of confirmed cases") + theme(axis.text=element_text(size=10,face="bold"),
-        axis.title=element_text(size=14,face="bold"),legend.title = element_text(size=12,face="bold"),legend.text = element_text(size=11)) + theme(aspect.ratio = 1) +  theme(plot.background=element_rect(fill="azure3"))
+    ggplot(data=region_df, aes(x=Days_since_1st_case, y=Confirmed_cases, color=Region)) + 
+    geom_line(size=1) + theme_bw() + 
+    xlab("Days since the 1st case in South Korea (January 20, 2020)") + 
+    ylab("Number of confirmed cases") + 
+    theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"),legend.title = element_text(size=12,face="bold"),legend.text = element_text(size=11)) + theme(aspect.ratio = 1) +  
+        theme(plot.background=element_rect(fill="azure3"))
   })
 }
 
